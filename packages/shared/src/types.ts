@@ -47,9 +47,9 @@ export interface Segment {
   /** Operating carrier IATA code, when known. */
   carrier?: string;
   /**
-   * Is the arrival point a stopover (>24h)? Default false — points are
-   * transfers unless the user marks them. The final arrival back at the
-   * origin is never a stopover.
+   * Is the arrival point a stopover (>24h)? Default true — points are
+   * stopovers unless marked as transfers (<24h layovers). The final arrival
+   * back at the origin is never a stopover.
    */
   stopover?: boolean;
   /** Optional ISO date of departure, enables date-dependent rules. */

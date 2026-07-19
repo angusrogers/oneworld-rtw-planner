@@ -97,9 +97,9 @@ export const lookup: AirportLookup = testAirport;
 
 /**
  * "SYD-HKG-LHR" or array of [from,to,opts] tuples → Itinerary.
- * String form marks every intermediate point as a stopover (the historical
- * default); use the tuple form to control stopover/transfer per point — the
- * engine default for an unset flag is a transfer.
+ * String form marks every intermediate point as an explicit stopover; use
+ * the tuple form to control stopover/transfer per point. (The engine treats
+ * an unset flag as a stopover too.)
  */
 export function itin(
   product: FareProduct,

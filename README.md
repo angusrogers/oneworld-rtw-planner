@@ -46,9 +46,10 @@ npm run dev            # → http://localhost:5173
    flight. The sidebar tracks segments/16, mileage vs cap, continents, ocean
    crossings, stopovers, the derived fare basis, and a "to finish you still
    need to…" checklist.
-4. Points are **transfers by default** — tick "stop" where you'll stay >24h
-   (the fare needs at least 2 stopovers, and stopover caps are separate from
-   the 16-segment limit). Pick the operating carrier per segment, add
+4. Points are **stopovers by default** (staying >24h) — tick "transfer" at
+   points where you just connect (a layover under 24h). The fare needs at
+   least 2 stopovers, and stopover caps are separate from the 16-segment
+   limit. Pick the operating carrier per segment, add
    **surface sectors** (🚆), undo/redo, and delete any leg with ✕ — removing
    a middle leg drops that point and merges the neighbours into one direct
    leg (or a surface sector if no direct flight exists). Switch fare product
@@ -108,7 +109,7 @@ destination labels and airports without data for maintainer review.
 2. **Mileage is great-circle**, not GDS ticketed-point mileage (TPM, typically
    ≤2% different). The app warns within 3% of any cap.
 3. **Stopover vs transfer needs dwell times.** Without dates every point is
-   treated as a transfer (<24h); tick "stop" where you'll stay longer. The
+   assumed a stopover (>24h); tick "transfer" where you'll just connect. The
    engine surfaces this as an assumption until dates exist.
 4. **Codeshare nuances are warnings, not data.** JQ/QQ/TN/WY exceptions need
    marketing-carrier data we don't have; the engine warns instead of failing.

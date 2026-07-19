@@ -32,6 +32,17 @@ export function MapView({ airports, arcs, onClickAirport }: MapViewProps) {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
 
     map.on('load', () => {
+      // Soften the ocean to a lighter blue-grey than the stock style.
+      for (const layer of map.getStyle().layers ?? []) {
+        if (layer.type === 'fill' && /water|ocean|sea/i.test(layer.id)) {
+          try {
+            map.setPaintProperty(layer.id, 'fill-color', '#e3eaf0');
+          } catch {
+            // non-fatal styling tweak
+          }
+        }
+      }
+
       map.addSource('airports', { type: 'geojson', data: airports });
       map.addSource('arcs', { type: 'geojson', data: arcs });
 

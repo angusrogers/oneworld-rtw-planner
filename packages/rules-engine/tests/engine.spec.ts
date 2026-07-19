@@ -70,21 +70,21 @@ describe('engine mechanics', () => {
     expect(final.valid).toBe(true);
   });
 
-  it('treats unmarked points as transfers by default', () => {
+  it('treats unmarked points as stopovers; explicit transfers are excluded', () => {
     const r = validate(
       {
         product: 'explorer',
         cabin: 'economy',
         segments: [
           { from: 'SYD', to: 'HKG' },
-          { from: 'HKG', to: 'LHR' },
+          { from: 'HKG', to: 'BKK', stopover: false },
+          { from: 'BKK', to: 'LHR' },
         ],
       },
       lookup,
     );
-    expect(r.stats.stopoverCount).toBe(0);
-    expect(r.todos.find((t) => t.message.includes('2 stopovers'))?.done).toBe(false);
-    expect(r.assumptions.join(' ')).toMatch(/transfers/i);
+    expect(r.stats.stopoverCount).toBe(1); // HKG counts, BKK is a transfer
+    expect(r.assumptions.join(' ')).toMatch(/assumed to be stopovers/i);
   });
 
   it('exposes airport metadata needed by the UI', () => {

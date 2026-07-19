@@ -58,10 +58,11 @@ clicking:
   **Faint grey** = no direct eligible flight (use a surface sector if you'll
   make your own way). Clicking a thinly-connected airport also warns you,
   e.g. *"ALA: flights in from DOH; flights out to DOH, HKG"*.
-- **Tick "stop"** on each point where you'll stay more than 24 hours.
-  Points are transfers by default; the fares require **at least 2 stopovers**
-  and cap how many you may make per region — stopovers are separate from the
-  16-segment limit.
+- Every point you visit is assumed to be a **stopover** (staying more than
+  24 hours). **Tick "transfer"** at points where you just connect — a
+  layover under 24 hours. The fares require **at least 2 stopovers** and cap
+  how many you may make per region; transfers don't count against those
+  caps. (Both kinds of leg count toward the 16-segment limit.)
 - **Pick the carrier** per leg from the dropdown when it matters (some rules
   are carrier-specific, e.g. Circle Pacific's QF-via-Chile requirement).
 - **🚆 Surface** arms a surface sector: the next airport you click is reached

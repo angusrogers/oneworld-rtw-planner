@@ -87,10 +87,10 @@ export function buildContext(itinerary: Itinerary, lookup: AirportLookup): Ctx {
     points.push(mkPoint(s.to, i));
   });
 
-  // Stopover flags: intermediate points only. Default is a transfer (<24h);
-  // the user marks the points where they actually stay >24h.
+  // Stopover flags: intermediate points only. Default is a stopover (>24h);
+  // the user marks quick connections (<24h layovers) as transfers.
   for (let i = 1; i < points.length - 1; i++) {
-    points[i].stopover = segments[i - 1].stopover ?? false;
+    points[i].stopover = segments[i - 1].stopover ?? true;
   }
 
   const segs: EnrichedSegment[] = segments.map((s, i) => {

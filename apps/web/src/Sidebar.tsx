@@ -112,7 +112,7 @@ export function Sidebar(props: SidebarProps) {
       lines.push(
         `${String(i + 1).padStart(2)}. ${s.from}-${s.to}${s.surface ? ' (surface)' : ''}${
           s.carrier ? ` ${s.carrier}` : ''
-        }${s.stopover === true && i < state.segments.length - 1 ? ' [stopover]' : ''}`,
+        }${s.stopover === false ? ' [transfer]' : ''}`,
       );
     });
     if (validation) {
@@ -269,21 +269,21 @@ export function Sidebar(props: SidebarProps) {
               {!isLast && (
                 <label
                   className="stopover-toggle"
-                  title="Tick if you will stay >24h at the arrival point (stopover); untick for a same-day connection (transfer)."
+                  title="Tick if this point is just a connection (layover under 24h). Unticked = stopover (staying more than 24h)."
                 >
                   <input
                     type="checkbox"
-                    checked={s.stopover === true}
+                    checked={s.stopover === false}
                     onChange={(e) =>
                       setState((p) => ({
                         ...p,
                         segments: p.segments.map((seg, j) =>
-                          j === i ? { ...seg, stopover: e.target.checked } : seg,
+                          j === i ? { ...seg, stopover: !e.target.checked } : seg,
                         ),
                       }))
                     }
                   />
-                  stop
+                  transfer
                 </label>
               )}
               <button

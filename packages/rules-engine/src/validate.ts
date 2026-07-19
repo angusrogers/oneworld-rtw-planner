@@ -140,7 +140,7 @@ export function validate(
   );
   if (anyStopoverDefaults) {
     out.assume(
-      'Intermediate points are treated as transfers (<24h) unless marked as stopovers. Tick “stop” at each point where you will stay longer than 24 hours — the fare requires at least 2.',
+      'Intermediate points are assumed to be stopovers (staying >24h). Tick “transfer” at each point where you will just connect (a layover under 24 hours).',
     );
   }
 
