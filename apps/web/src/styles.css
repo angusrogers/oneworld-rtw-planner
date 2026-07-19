@@ -1,0 +1,105 @@
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #1d2733;
+}
+
+.app { display: flex; height: 100%; }
+.map-container { flex: 1; min-width: 0; }
+
+.sidebar {
+  width: 390px;
+  max-width: 45vw;
+  overflow-y: auto;
+  border-left: 1px solid #dde3ea;
+  background: #fbfcfe;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sidebar header h1 { font-size: 17px; margin: 0 0 8px; }
+.selectors { display: flex; gap: 6px; }
+.selectors select { flex: 1; padding: 4px; }
+
+.search { position: relative; }
+.search input { width: 100%; padding: 6px 8px; border: 1px solid #ccd4dd; border-radius: 6px; }
+.search-results {
+  position: absolute; z-index: 20; left: 0; right: 0; top: 100%;
+  background: #fff; border: 1px solid #ccd4dd; border-radius: 6px;
+  list-style: none; margin: 2px 0 0; padding: 2px; max-height: 220px; overflow-y: auto;
+}
+.search-results button {
+  display: block; width: 100%; text-align: left; background: none;
+  border: none; padding: 5px 8px; cursor: pointer; font-size: 13px;
+}
+.search-results button:hover { background: #eef3f8; }
+
+.hint { margin: 0; color: #444; line-height: 1.4; }
+.hint.build { color: #12508a; }
+
+.notice {
+  background: #fdf3e4; border: 1px solid #e8c98a; border-radius: 6px;
+  padding: 8px 10px; cursor: pointer; white-space: pre-wrap; line-height: 1.4;
+}
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 6px; }
+.toolbar button {
+  padding: 5px 9px; border: 1px solid #ccd4dd; border-radius: 6px;
+  background: #fff; cursor: pointer; font-size: 13px;
+}
+.toolbar button:disabled { opacity: 0.45; cursor: default; }
+.toolbar button.active { background: #c98f00; color: #fff; border-color: #c98f00; }
+
+.segments { display: flex; flex-direction: column; gap: 4px; }
+.segment-row {
+  display: flex; align-items: center; gap: 6px;
+  background: #fff; border: 1px solid #e4e9ef; border-radius: 6px; padding: 5px 8px;
+}
+.seg-route { flex: 1; }
+.seg-route em { color: #8a8a8a; font-style: normal; font-size: 12px; }
+.segment-row select { max-width: 130px; font-size: 12px; }
+.stopover-toggle { font-size: 12px; color: #555; white-space: nowrap; }
+.seg-delete {
+  border: none; background: none; color: #a05252; cursor: pointer;
+  font-size: 12px; padding: 2px 4px; border-radius: 4px;
+}
+.seg-delete:hover { background: #fbeaea; }
+
+.stats { background: #fff; border: 1px solid #e4e9ef; border-radius: 6px; padding: 8px 10px; }
+.fare-basis { font-size: 15px; margin-bottom: 6px; }
+.fare-basis strong { color: #12508a; }
+.stat-line { margin: 3px 0; color: #333; }
+.bar {
+  display: inline-block; width: 110px; height: 7px; background: #e8edf2;
+  border-radius: 4px; margin-left: 8px; overflow: hidden; vertical-align: middle;
+}
+.bar-fill { display: block; height: 100%; }
+
+.todos h2, .violations h2, .warnings h2 { font-size: 13px; margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.todos ul, .violations ul, .warnings ul { margin: 0; padding-left: 4px; list-style: none; line-height: 1.5; }
+.todos li.done { color: #1a7f37; }
+.todos li { color: #7a6a1a; }
+.violations { background: #fbeaea; border-radius: 6px; padding: 8px 10px; }
+.violations li { color: #8f2020; margin-bottom: 4px; }
+.warnings { background: #fdf6e3; border-radius: 6px; padding: 8px 10px; }
+.warnings li { color: #7a5b10; margin-bottom: 4px; }
+.violations code, .warnings code { font-size: 11px; background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 3px; }
+
+.finish { border-radius: 6px; padding: 9px 10px; line-height: 1.4; }
+.finish.ok { background: #e7f6ec; color: #135c2c; }
+.finish.not-ok { background: #f2f4f7; color: #555; }
+
+.assumptions p { color: #7a828c; font-size: 12px; margin: 3px 0; line-height: 1.4; }
+
+.sidebar footer {
+  margin-top: auto; padding-top: 10px; border-top: 1px solid #e4e9ef;
+  color: #7a828c; font-size: 11.5px; line-height: 1.5;
+}
+
+.fullscreen-message {
+  height: 100%; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 8px; color: #333; padding: 24px; text-align: center;
+}

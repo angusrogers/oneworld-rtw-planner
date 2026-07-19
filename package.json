@@ -1,0 +1,19 @@
+{
+  "name": "oneworld-rtw-planner",
+  "private": true,
+  "version": "0.1.0",
+  "description": "oneworld RTW Explorer route planner: clickable map + reachability + live fare-rule validation",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "npm run test -w @rtw/rules-engine",
+    "pipeline": "npm run pipeline -w @rtw/data-pipeline",
+    "dev": "npm run dev -w @rtw/web",
+    "build": "npm run build -w @rtw/web"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

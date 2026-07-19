@@ -1,0 +1,18 @@
+{
+  "name": "@rtw/data-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "pipeline": "tsx src/build-snapshot.ts"
+  },
+  "dependencies": {
+    "@rtw/shared": "*",
+    "cheerio": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

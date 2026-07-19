@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-07-19T01:36:31.857Z",
+  "airports": 987,
+  "edges": 7373,
+  "singleSourceEdges": 343,
+  "airportsWithoutData": [
+    "DAC"
+  ],
+  "unresolvedDestinations": [
+    [
+      "Christmas Island",
+      1
+    ],
+    [
+      "Cocos (Keeling) Islands",
+      1
+    ]
+  ],
+  "elapsedSeconds": 5
+}

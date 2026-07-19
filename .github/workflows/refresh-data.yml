@@ -1,0 +1,41 @@
+name: Weekly route-data refresh
+
+on:
+  schedule:
+    # Mondays 02:00 UTC — airline schedules change on a seasonal cadence,
+    # weekly is generous (build guide §4.1).
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # No cache in CI: this is a full, polite (~1 req/s) Wikipedia crawl.
+      - run: npm run pipeline
+        timeout-minutes: 90
+      - name: Commit updated snapshot
+        run: |
+          git config user.name "route-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/snapshot
+          if git diff --cached --quiet; then
+            echo "No route changes this week."
+          else
+            git commit -m "Weekly route-data refresh"
+            git push
+            # GITHUB_TOKEN pushes don't trigger workflows — deploy explicitly.
+            gh workflow run deploy.yml
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
