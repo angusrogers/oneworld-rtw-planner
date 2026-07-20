@@ -86,8 +86,7 @@ export function App() {
           : a.slice(0, 6).join(', ') + (a.length > 6 ? ` +${a.length - 6} more` : '');
       return (
         `⚠ ${iata} is thinly connected on this fare product: ` +
-        `flights in from ${list(inn)}; flights out to ${list(out)}. ` +
-        'Plan your routing through it carefully.'
+        `flights in from ${list(inn)}; flights out to ${list(out)}. `
       );
     },
     [connectivity],
