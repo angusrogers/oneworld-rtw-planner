@@ -62,6 +62,12 @@ export function App() {
     [graph, state.product],
   );
 
+  /** No eligible routes in the snapshot for this product (e.g. Star before a crawl). */
+  const emptyData = useMemo(
+    () => graph !== null && ![...degrees.values()].some((d) => d > 0),
+    [graph, degrees],
+  );
+
   const connectivity = useMemo(
     () => (graph ? connectivityFor(graph, state.product) : null),
     [graph, state.product],
@@ -279,6 +285,7 @@ export function App() {
         surfaceMode={surfaceMode}
         setSurfaceMode={setSurfaceMode}
         onSelectAirport={onClickAirport}
+        emptyData={emptyData}
       />
     </div>
   );
@@ -293,9 +300,16 @@ function degreeColor(deg: number): string {
 }
 
 export function productLabel(p: string): string {
-  return p === 'explorer'
-    ? 'oneworld Explorer'
-    : p === 'global-explorer'
-      ? 'Global Explorer'
-      : 'Circle Pacific';
+  switch (p) {
+    case 'explorer':
+      return 'oneworld Explorer';
+    case 'global-explorer':
+      return 'Global Explorer';
+    case 'circle-pacific':
+      return 'Circle Pacific';
+    case 'star-rtw':
+      return 'Star Alliance RTW';
+    default:
+      return p;
+  }
 }

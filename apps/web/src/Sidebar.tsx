@@ -1,6 +1,12 @@
 import { useMemo, useState } from 'react';
-import type { CabinClass, FareProduct, ValidationResult } from '@rtw/shared';
-import { CARRIER_NAMES, CONTINENT_NAMES, RULES_EDITION } from '@rtw/shared';
+import type { Alliance, CabinClass, FareProduct, ValidationResult } from '@rtw/shared';
+import {
+  CARRIER_NAMES,
+  CONTINENT_NAMES,
+  PRODUCT_ALLIANCE,
+  RULES_EDITION,
+  STAR_RULES_EDITION,
+} from '@rtw/shared';
 import { productLabel, type NextHop } from './App.tsx';
 import { productCarrierMask, type Graph } from './graph.js';
 import { currentPoint, usePlannerState } from './state.ts';
@@ -16,12 +22,21 @@ interface SidebarProps {
   surfaceMode: boolean;
   setSurfaceMode: (b: boolean) => void;
   onSelectAirport: (iata: string) => void;
+  /** No routes in the snapshot for the selected product (Star pre-crawl). */
+  emptyData: boolean;
 }
 
 const MILEAGE_CAPS: Record<FareProduct, Record<CabinClass, number> | null> = {
   explorer: null,
-  'global-explorer': { economy: 39000, business: 34000, first: 34000 },
-  'circle-pacific': { economy: 29000, business: 29000, first: 29000 },
+  'global-explorer': {
+    economy: 39000, 'premium-economy': 0, business: 34000, first: 34000,
+  },
+  'circle-pacific': {
+    economy: 29000, 'premium-economy': 0, business: 29000, first: 29000,
+  },
+  'star-rtw': {
+    economy: 39000, 'premium-economy': 39000, business: 39000, first: 39000,
+  },
 };
 
 export function Sidebar(props: SidebarProps) {
@@ -103,10 +118,12 @@ export function Sidebar(props: SidebarProps) {
   }, [graph, search]);
 
   const exportText = (): string => {
+    const edition =
+      PRODUCT_ALLIANCE[state.product] === 'star' ? STAR_RULES_EDITION : RULES_EDITION;
     const lines = [
       `${productLabel(state.product)} itinerary — ${state.cabin}, fare basis ${
         completeValidation?.fareBasis ?? 'n/a'
-      } (rules as of ${RULES_EDITION})`,
+      } (rules as of ${edition})`,
     ];
     state.segments.forEach((s, i) => {
       lines.push(
@@ -123,7 +140,11 @@ export function Sidebar(props: SidebarProps) {
       );
     }
     lines.push(
-      'Validated offline against the published fare rules. Availability and pricing NOT checked — reproduce in rtw.oneworld.com or hand to a travel agent.',
+      `Validated offline against the published fare rules. Availability and pricing NOT checked — reproduce in ${
+        PRODUCT_ALLIANCE[state.product] === 'star'
+          ? 'the Star Alliance Book and Fly tool'
+          : 'rtw.oneworld.com'
+      } or hand to a travel agent.`,
     );
     return lines.join('\n');
   };
@@ -142,10 +163,43 @@ export function Sidebar(props: SidebarProps) {
   const cap = caps?.[state.cabin] ?? null;
   const miles = validation?.stats.totalMiles ?? 0;
 
+  const alliance = PRODUCT_ALLIANCE[state.product];
+  const rulesEdition = alliance === 'star' ? STAR_RULES_EDITION : RULES_EDITION;
+  const bookingTool =
+    alliance === 'star'
+      ? { href: 'https://www.staralliance.com/en/round-the-world', label: 'Star Alliance Book and Fly' }
+      : { href: 'https://rtw.oneworld.com', label: 'rtw.oneworld.com' };
+
+  const switchAlliance = (target: Alliance) => {
+    if (target === alliance) return;
+    setState((p) => ({
+      ...p,
+      product: target === 'star' ? 'star-rtw' : 'explorer',
+      // Premium economy only exists on the Star fare.
+      cabin: target === 'oneworld' && p.cabin === 'premium-economy' ? 'economy' : p.cabin,
+    }));
+  };
+
   return (
     <div className="sidebar">
       <header>
-        <h1>oneworld RTW planner</h1>
+        <div className="header-row">
+          <h1>{alliance === 'star' ? 'Star Alliance RTW planner' : 'oneworld RTW planner'}</h1>
+          <div className="alliance-toggle" role="group" aria-label="Alliance">
+            <button
+              className={alliance === 'oneworld' ? 'active' : ''}
+              onClick={() => switchAlliance('oneworld')}
+            >
+              oneworld
+            </button>
+            <button
+              className={alliance === 'star' ? 'active' : ''}
+              onClick={() => switchAlliance('star')}
+            >
+              Star Alliance
+            </button>
+          </div>
+        </div>
         <div className="selectors">
           <select
             value={state.product}
@@ -153,20 +207,38 @@ export function Sidebar(props: SidebarProps) {
               setState((p) => ({ ...p, product: e.target.value as FareProduct }))
             }
           >
-            <option value="explorer">oneworld Explorer (continents)</option>
-            <option value="global-explorer">Global Explorer (mileage)</option>
-            <option value="circle-pacific">Circle Pacific (mileage)</option>
+            {alliance === 'oneworld' ? (
+              <>
+                <option value="explorer">oneworld Explorer (continents)</option>
+                <option value="global-explorer">Global Explorer (mileage)</option>
+                <option value="circle-pacific">Circle Pacific (mileage)</option>
+              </>
+            ) : (
+              <option value="star-rtw">Round the World (mileage)</option>
+            )}
           </select>
           <select
             value={state.cabin}
             onChange={(e) => setState((p) => ({ ...p, cabin: e.target.value as CabinClass }))}
           >
             <option value="economy">Economy</option>
+            {state.product === 'star-rtw' && (
+              <option value="premium-economy">Premium Economy</option>
+            )}
             <option value="business">Business</option>
             <option value="first">First</option>
           </select>
         </div>
       </header>
+
+      {props.emptyData && (
+        <div className="notice">
+          No {alliance === 'star' ? 'Star Alliance' : ''} route data in the snapshot
+          yet — the map has nothing to show for this product. Run{' '}
+          <code>npm run pipeline</code> to crawl it (rule validation works
+          regardless).
+        </div>
+      )}
 
       <div className="search">
         <input
@@ -401,12 +473,12 @@ export function Sidebar(props: SidebarProps) {
       )}
 
       <footer>
-        Rules as of {RULES_EDITION} · snapshot {graph.snapshot.generatedAt.slice(0, 10)} ·
+        Rules as of {rulesEdition} · snapshot {graph.snapshot.generatedAt.slice(0, 10)} ·
         sources: {graph.snapshot.sources.join(', ')}.
         <br />
         No availability or pricing — final check in{' '}
-        <a href="https://rtw.oneworld.com" target="_blank" rel="noreferrer">
-          rtw.oneworld.com
+        <a href={bookingTool.href} target="_blank" rel="noreferrer">
+          {bookingTool.label}
         </a>
         . Mileage is great-circle, not ticketed TPM.
       </footer>

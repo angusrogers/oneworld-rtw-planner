@@ -7,5 +7,9 @@ export {
   globTiers,
   globTierFor,
   cpTierFor,
+  starTiers,
+  starTierFor,
+  starMaxCap,
   type MileageTier,
+  type StarTier,
 } from './fare-basis.js';

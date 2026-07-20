@@ -185,5 +185,13 @@ export const CP_EXCLUDED_NA_COUNTRIES = new Set([
   'TT', 'VC', 'VG', 'VI',
 ]);
 
-/** Rule edition surfaced in the UI footer. */
+/** Rule edition surfaced in the UI footer (oneworld products). */
 export const RULES_EDITION = '27 FEB 26';
+
+/** Star Alliance RTW T&C edition (docs/rules-pdfs/Star_Alliance_RTW_TnC_12JAN22.md). */
+export const STAR_RULES_EDITION = '12 JAN 22';
+
+/** Star RTW §1.4: countries the Book & Fly tool cannot book flights to/from. */
+export const STAR_BOOKFLY_EXCLUDED_COUNTRIES = new Set([
+  'BY', 'RU', 'IR', 'SY', 'KP',
+]);

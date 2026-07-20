@@ -36,8 +36,14 @@ export interface RouteEdge {
   notes?: string[];
 }
 
-export type FareProduct = 'explorer' | 'global-explorer' | 'circle-pacific';
-export type CabinClass = 'economy' | 'business' | 'first';
+export type FareProduct =
+  | 'explorer'
+  | 'global-explorer'
+  | 'circle-pacific'
+  | 'star-rtw';
+export type Alliance = 'oneworld' | 'star';
+/** Premium economy exists only on the Star Alliance RTW fare. */
+export type CabinClass = 'economy' | 'premium-economy' | 'business' | 'first';
 
 export interface Segment {
   from: string;

@@ -3,6 +3,7 @@ import type { Ctx } from './context.js';
 
 const CABIN_LETTER: Record<CabinClass, string> = {
   economy: 'L',
+  'premium-economy': 'W', // not offered on any oneworld product; W is defensive
   business: 'D',
   first: 'A',
 };
@@ -41,6 +42,8 @@ export function globTiers(cabin: CabinClass): MileageTier[] {
         { code: 'LGLOB34', cap: 34000 },
         { code: 'LGLOB39', cap: 39000 },
       ];
+    case 'premium-economy':
+      return []; // not offered on Global Explorer
     case 'business':
       return [
         { code: 'IGLOB26', cap: 26000 },
@@ -61,6 +64,7 @@ export function cpTierFor(
   miles: number,
   includesSouthAmerica: boolean,
 ): MileageTier | null {
+  if (cabin === 'premium-economy') return null; // not offered on Circle Pacific
   const letter = CABIN_LETTER[cabin];
   if (includesSouthAmerica) {
     return miles <= 29000 ? { code: `${letter}CIR29SA`, cap: 29000 } : null;
@@ -68,4 +72,80 @@ export function cpTierFor(
   if (miles <= 22000) return { code: `${letter}CIR22`, cap: 22000 };
   if (miles <= 26000) return { code: `${letter}CIR26`, cap: 26000 };
   return null;
+}
+
+/**
+ * Star Alliance RTW tier (T&C §2.1/§2.2 table). `special` fares have tighter
+ * stopover bands and are cheaper; Normal fares always allow 2–15 stopovers.
+ * Codes are descriptive (the T&C publishes no GDS fare-basis codes).
+ */
+export interface StarTier extends MileageTier {
+  special: boolean;
+  minStops: number;
+  maxStops: number;
+}
+
+const STAR_CABIN_LETTER: Record<CabinClass, string> = {
+  economy: 'Y',
+  'premium-economy': 'W',
+  business: 'C',
+  first: 'F',
+};
+
+export function starTiers(cabin: CabinClass): StarTier[] {
+  const L = STAR_CABIN_LETTER[cabin];
+  const normal = (cap: number): StarTier => ({
+    code: `${L}STAR${cap / 1000}`,
+    cap,
+    special: false,
+    minStops: 2,
+    maxStops: 15,
+  });
+  const special = (cap: number, maxStops: number): StarTier => ({
+    code: `${L}STAR${cap / 1000}SP`,
+    cap,
+    special: true,
+    minStops: 3,
+    maxStops,
+  });
+  switch (cabin) {
+    case 'economy':
+      // Ordered cheapest-first at each cap: Special undercuts Normal.
+      return [
+        special(26000, 5),
+        special(29000, 7), normal(29000),
+        special(34000, 10), normal(34000),
+        special(39000, 12), normal(39000),
+      ];
+    case 'business':
+      return [special(26000, 15), normal(29000), normal(34000), normal(39000)];
+    case 'premium-economy':
+    case 'first':
+      return [normal(29000), normal(34000), normal(39000)];
+  }
+}
+
+/**
+ * Lowest applicable Star tier for display. Special fares require ≥3 stopovers,
+ * respect the tier's stopover ceiling, and are not offered ex-Japan (§2.2).
+ */
+export function starTierFor(
+  cabin: CabinClass,
+  miles: number,
+  stopovers: number,
+  originJapan: boolean,
+): StarTier | null {
+  return (
+    starTiers(cabin).find(
+      (t) =>
+        miles <= t.cap &&
+        stopovers <= t.maxStops &&
+        (!t.special || (stopovers >= t.minStops && !originJapan)),
+    ) ?? null
+  );
+}
+
+/** The legality envelope for Star RTW: the most permissive tier per cabin. */
+export function starMaxCap(cabin: CabinClass): number {
+  return Math.max(...starTiers(cabin).map((t) => t.cap));
 }

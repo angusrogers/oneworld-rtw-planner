@@ -10,11 +10,13 @@ import { buildContext, stopoverPoints, type Ctx } from './context.js';
 import { validateCirclePacific } from './circle-pacific.js';
 import { validateExplorer } from './explorer.js';
 import { validateGlobalExplorer } from './global-explorer.js';
+import { validateStarRtw } from './star-rtw.js';
 import {
   continentsCounted3015,
   cpTierFor,
   fareBasis3015,
   globTierFor,
+  starTierFor,
 } from './fare-basis.js';
 
 const AMERICAS: Continent[] = ['NA', 'SA'];
@@ -69,6 +71,17 @@ function deriveFareBasis(ctx: Ctx): string | null {
       const includesSA = ctx.points.some((p) => p.continent === 'SA');
       return cpTierFor(cabin, ctx.totalMilesWithOpenJaw, includesSA)?.code ?? null;
     }
+    case 'star-rtw':
+      // Star permits any-city return within the origin country, so the
+      // origin-destination gap is not a ticketed sector: use flown miles.
+      return (
+        starTierFor(
+          cabin,
+          ctx.totalMiles,
+          stopoverPoints(ctx).length,
+          ctx.origin.country === 'JP',
+        )?.code ?? null
+      );
   }
 }
 
@@ -123,16 +136,30 @@ export function validate(
   const ctx = buildContext(itinerary, lookup);
   const out = new Out();
 
-  switch (itinerary.product) {
-    case 'explorer':
-      validateExplorer(ctx, out, complete);
-      break;
-    case 'global-explorer':
-      validateGlobalExplorer(ctx, out, complete);
-      break;
-    case 'circle-pacific':
-      validateCirclePacific(ctx, out, complete);
-      break;
+  // Premium Economy exists only on the Star Alliance RTW fare.
+  const cabinUnavailable =
+    itinerary.cabin === 'premium-economy' && itinerary.product !== 'star-rtw';
+  if (cabinUnavailable) {
+    out.violate(
+      'R-CABIN',
+      'Premium Economy is only offered on the Star Alliance Round the World fare.',
+      [],
+    );
+  } else {
+    switch (itinerary.product) {
+      case 'explorer':
+        validateExplorer(ctx, out, complete);
+        break;
+      case 'global-explorer':
+        validateGlobalExplorer(ctx, out, complete);
+        break;
+      case 'circle-pacific':
+        validateCirclePacific(ctx, out, complete);
+        break;
+      case 'star-rtw':
+        validateStarRtw(ctx, out, complete);
+        break;
+    }
   }
 
   const anyStopoverDefaults = itinerary.segments.some(
@@ -153,7 +180,7 @@ export function validate(
     todos: out.todos,
     assumptions: out.assumptions,
     stats: buildStats(ctx),
-    fareBasis: deriveFareBasis(ctx),
+    fareBasis: cabinUnavailable ? null : deriveFareBasis(ctx),
   };
 }
 

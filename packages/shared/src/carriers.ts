@@ -1,10 +1,25 @@
-import type { FareProduct } from './types.js';
+import type { Alliance, FareProduct } from './types.js';
 
 /**
- * Eligible operating carriers per fare product (27 FEB 26 editions).
- * Rule 3015 header: AA/AS/AT/AY/BA/CX/FJ/IB/JL/MH/NU/QF/QR/RJ/UL/WY
- * Rule 9701 header: + EI/GK/JQ/PG/WS
- * Rule 7889 header: AA/AS/BA/CX/FJ/JL/MH/NU/QF/QR/RJ/UL
+ * Star Alliance members per the RTW T&C §1.1 (12 JAN 22): Aegean, Air Canada,
+ * Air China, Air India, Air New Zealand, ANA, Asiana, Austrian, Avianca,
+ * Brussels, Copa, Croatia, Ethiopian, EVA, EGYPTAIR, ITA, LOT, Lufthansa,
+ * Singapore, Shenzhen, South African, Swiss, TAP, THAI, Turkish, United.
+ */
+const STAR_MEMBERS = [
+  'A3', 'AC', 'CA', 'AI', 'NZ', 'NH', 'OZ', 'OS', 'AV', 'SN', 'CM', 'OU',
+  'ET', 'BR', 'MS', 'AZ', 'LO', 'LH', 'SQ', 'ZH', 'SA', 'LX', 'TP', 'TG',
+  'TK', 'UA',
+] as const;
+
+/**
+ * Eligible operating carriers per fare product.
+ * oneworld (27 FEB 26 editions):
+ *  Rule 3015 header: AA/AS/AT/AY/BA/CX/FJ/IB/JL/MH/NU/QF/QR/RJ/UL/WY
+ *  Rule 9701 header: + EI/GK/JQ/PG/WS
+ *  Rule 7889 header: AA/AS/BA/CX/FJ/JL/MH/NU/QF/QR/RJ/UL
+ * Star Alliance RTW (12 JAN 22): the member list above; codeshares and
+ * regional partners are generally included (T&C §1.2).
  */
 export const PRODUCT_CARRIERS: Record<FareProduct, ReadonlySet<string>> = {
   explorer: new Set([
@@ -18,6 +33,14 @@ export const PRODUCT_CARRIERS: Record<FareProduct, ReadonlySet<string>> = {
   'circle-pacific': new Set([
     'AA', 'AS', 'BA', 'CX', 'FJ', 'JL', 'MH', 'NU', 'QF', 'QR', 'RJ', 'UL',
   ]),
+  'star-rtw': new Set(STAR_MEMBERS),
+};
+
+export const PRODUCT_ALLIANCE: Record<FareProduct, Alliance> = {
+  explorer: 'oneworld',
+  'global-explorer': 'oneworld',
+  'circle-pacific': 'oneworld',
+  'star-rtw': 'star',
 };
 
 /**
@@ -39,6 +62,8 @@ export const CODESHARE_EXCEPTIONS: Record<FareProduct, Record<string, string>> =
     AY: 'AY (Finnair) counts only on its SYD–SIN/BKK services.',
     WY: 'WY (Oman Air) flights count only when operated for QR codeshares.',
   },
+  // Star RTW T&C §1.2: codeshares/regional partners are generally included.
+  'star-rtw': {},
 };
 
 /** Circle Pacific: AY only valid on these sectors (either direction). */
@@ -52,6 +77,7 @@ export const ALL_CARRIERS = new Set([
   ...PRODUCT_CARRIERS.explorer,
   ...PRODUCT_CARRIERS['global-explorer'],
   ...PRODUCT_CARRIERS['circle-pacific'],
+  ...PRODUCT_CARRIERS['star-rtw'],
 ]);
 
 export const CARRIER_NAMES: Record<string, string> = {
@@ -62,6 +88,14 @@ export const CARRIER_NAMES: Record<string, string> = {
   NU: 'Japan Transocean Air', PG: 'Bangkok Airways', QF: 'Qantas',
   QR: 'Qatar Airways', RJ: 'Royal Jordanian', UL: 'SriLankan Airlines',
   WS: 'WestJet', WY: 'Oman Air',
+  A3: 'Aegean Airlines', AC: 'Air Canada', CA: 'Air China', AI: 'Air India',
+  NZ: 'Air New Zealand', NH: 'ANA', OZ: 'Asiana Airlines', OS: 'Austrian',
+  AV: 'Avianca', SN: 'Brussels Airlines', CM: 'Copa Airlines',
+  OU: 'Croatia Airlines', ET: 'Ethiopian Airlines', BR: 'EVA Air',
+  MS: 'EGYPTAIR', AZ: 'ITA Airways', LO: 'LOT Polish Airlines',
+  LH: 'Lufthansa', SQ: 'Singapore Airlines', ZH: 'Shenzhen Airlines',
+  SA: 'South African Airways', LX: 'Swiss', TP: 'TAP Air Portugal',
+  TG: 'THAI', TK: 'Turkish Airlines', UA: 'United',
 };
 
 /**
@@ -87,4 +121,18 @@ export const AFFILIATE_BRANDS: Record<string, string> = {
   'royal air maroc express': 'AT', 'ram express': 'AT',
   'westjet encore': 'WS',
   'jetstar japan': 'GK',
+  // Star Alliance regional/affiliate brands (RTW T&C §1.2 includes them).
+  'air canada express': 'AC', 'air canada rouge': 'AC', 'jazz aviation': 'AC',
+  'united express': 'UA',
+  'lufthansa cityline': 'LH', 'lufthansa city airlines': 'LH',
+  'air dolomiti': 'LH',
+  'ana wings': 'NH', 'air japan': 'NH',
+  'austrian airlines': 'OS',
+  'brussels airlines': 'SN',
+  'swiss international air lines': 'LX', 'helvetic airways': 'LX',
+  'tap express': 'TP', 'portugalia': 'TP',
+  'lot polish airlines': 'LO',
+  'thai smile': 'TG',
+  'avianca costa rica': 'AV', 'avianca ecuador': 'AV', 'avianca el salvador': 'AV',
+  'olympic air': 'A3',
 };

@@ -35,7 +35,7 @@ describe('engine mechanics', () => {
       seed = (seed * 1103515245 + 12345) % 2 ** 31;
       return seed / 2 ** 31;
     };
-    const products: FareProduct[] = ['explorer', 'global-explorer', 'circle-pacific'];
+    const products: FareProduct[] = ['explorer', 'global-explorer', 'circle-pacific', 'star-rtw'];
     for (let walk = 0; walk < 300; walk++) {
       const product = products[Math.floor(rand() * products.length)];
       const len = 1 + Math.floor(rand() * 12);
