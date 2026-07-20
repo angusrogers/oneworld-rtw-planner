@@ -19,6 +19,7 @@ const SNAPSHOT_DIR = path.join(ROOT, 'data/snapshot');
 
 /** Hub seeds per eligible carrier — the crawl expands from here. */
 const SEEDS = [
+  // oneworld
   // QF/JQ           AA                          AS
   'SYD', 'MEL', 'BNE', 'PER', 'DFW', 'CLT', 'ORD', 'PHL', 'PHX', 'MIA',
   'JFK', 'LAX', 'DCA', 'SEA', 'PDX', 'SFO', 'ANC',
@@ -27,9 +28,18 @@ const SEEDS = [
   'KIX', 'OKA',
   // MH     PG     QR     RJ     UL     WS            WY
   'KUL', 'BKK', 'DOH', 'AMM', 'CMB', 'YYC', 'YYZ', 'MCT',
+  // Star Alliance
+  // LH/LX/OS/SN         A3     TP            AZ     OU     LO     TK
+  'FRA', 'MUC', 'ZRH', 'GVA', 'VIE', 'BRU', 'ATH', 'LIS', 'OPO', 'FCO',
+  'ZAG', 'WAW', 'IST',
+  // MS     ET     SA     AC            UA (rest are oneworld seeds too)
+  'CAI', 'ADD', 'JNB', 'YVR', 'YUL', 'EWR', 'IAD', 'DEN', 'IAH',
+  // CM     AV            NZ     SQ     OZ     BR     CA/ZH         AI
+  'PTY', 'BOG', 'SAL', 'AKL', 'SIN', 'ICN', 'TPE', 'PEK', 'PVG', 'SZX',
+  'DEL', 'BOM',
 ];
 
-const MAX_AIRPORTS = 1500;
+const MAX_AIRPORTS = 2600;
 
 interface EdgeAccum {
   carriers: Map<string, Set<string>>; // carrier → set of source directions seen

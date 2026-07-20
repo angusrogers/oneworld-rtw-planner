@@ -1,10 +1,11 @@
 {
-  "generatedAt": "2026-07-19T01:36:31.857Z",
-  "airports": 987,
-  "edges": 7373,
-  "singleSourceEdges": 343,
+  "generatedAt": "2026-07-20T11:30:04.966Z",
+  "airports": 1512,
+  "edges": 15610,
+  "singleSourceEdges": 952,
   "airportsWithoutData": [
-    "DAC"
+    "DAC",
+    "BCJ"
   ],
   "unresolvedDestinations": [
     [
@@ -16,5 +17,5 @@
       1
     ]
   ],
-  "elapsedSeconds": 5
+  "elapsedSeconds": 5403
 }

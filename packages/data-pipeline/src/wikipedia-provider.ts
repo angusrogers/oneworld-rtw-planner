@@ -17,6 +17,15 @@ function buildCarrierMatchers(): Array<[string, string | null]> {
     ['jetstar asia', null], // 3K — not eligible
     ['aer lingus regional', null], // operated by Emerald Airlines — not eligible
     ['american eagle', 'AA'],
+    // Star lookalikes that must not match member prefixes:
+    ['thai airasia', null], ['thai lion', null], ['thai vietjet', null], // not TG
+    ['anadolujet', null], ['ajet', null], // TK's LCC brand — not on the RTW fare
+    ['united nigeria', null], // not UA
+    ['air india express', null], // AI's LCC subsidiary — not on the RTW fare
+    // Wikipedia name variants for Star members:
+    ['all nippon airways', 'NH'],
+    ['tap portugal', 'TP'],
+    ['swiss ', 'LX'],
   ];
   for (const [code, name] of Object.entries(CARRIER_NAMES)) {
     if (ALL_CARRIERS.has(code)) entries.push([name.toLowerCase(), code]);
