@@ -17,7 +17,10 @@ export interface Graph {
 
 export async function loadGraph(): Promise<Graph> {
   // Relative path: works at the domain root and under a sub-path deployment.
-  const res = await fetch('snapshot.json');
+  // no-cache: always revalidate with the server (ETag/304) so a freshly
+  // deployed snapshot is picked up immediately — Safari otherwise serves a
+  // stale cached copy for a long time.
+  const res = await fetch('snapshot.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error(`snapshot.json missing (${res.status})`);
   const snapshot = (await res.json()) as Snapshot;
   const airports = new Map(snapshot.airports.map((a) => [a.iata, a]));
