@@ -1,82 +1,73 @@
-# oneworld RTW Explorer Planner
+# RTW Explorer Planner
 
-Plan **oneworld round-the-world itineraries** on a clickable map with live
-fare-rule validation — a friendlier alternative to the official planner that
-tells you *why* something is illegal and *where you can actually go next*.
+**Plan round-the-world airline itineraries on a clickable map, with the fare
+rules checked live as you build.**
 
-Covers the three multi-stop fare products (27 FEB 26 rule editions, PDFs in
-`docs/rules-pdfs/`):
+### ✈ [Open the planner → angusrogers.github.io/oneworld-rtw-planner](https://angusrogers.github.io/oneworld-rtw-planner/)
 
-| Product | Rule | Priced by |
-|---|---|---|
-| oneworld Explorer | 3015 | Continents visited (3–6) → `LONE4`, `DONE5`… |
-| Global Explorer | 9701 | Mileage (26/29/34/39k) → `LGLOB34`… |
-| Circle Pacific Explorer | 7889 | Mileage (22/26/29kSA) → `LCIR26`… |
+A friendlier alternative to the official planners that tells you *why*
+something is illegal and *where you can actually go next*. Covers both
+alliances' multi-stop fare products — switch with the toggle in the top
+right:
 
-**New here? Read the [user guide](docs/user-guide.md)** — startup/shutdown,
-how to build an itinerary, and what the colours mean.
+| Alliance | Product | Rules | Priced by |
+|---|---|---|---|
+| oneworld | oneworld Explorer | Rule 3015, 27 FEB 26 | Continents visited (3–6) → `LONE4`, `DONE5`… |
+| oneworld | Global Explorer | Rule 9701, 27 FEB 26 | Mileage (26/29/34/39k) → `LGLOB34`… |
+| oneworld | Circle Pacific Explorer | Rule 7889, 27 FEB 26 | Mileage (22/26/29kSA) → `LCIR26`… |
+| Star Alliance | Round the World | T&C 12 JAN 22 | Mileage (26/29/34/39k), Normal/Special tiers |
 
-## Quick start (Apple Silicon macOS)
+The canonical rule texts live in `docs/rules-pdfs/`.
 
-Requires Node ≥ 20 (`brew install node`).
+## Using the site
 
-```bash
-npm install
-
-# 1. Run the rules-engine test suite (62 tests)
-npm test
-
-# 2. Build the route snapshot (~20 min first run; crawls Wikipedia airport
-#    pages politely and caches them under data/cache/)
-npm run pipeline
-
-# 3. Launch the app
-npm run dev            # → http://localhost:5173
-```
-
-## Using the app
-
-1. **Explore mode** — every airport served by an eligible carrier is on the
-   map; marker size/colour = number of onward destinations under the selected
-   fare product ("where should I even try from here?").
-2. Click an airport (or use search) to set your **origin**.
-3. **Build mode** — green airports are *legal next hops* (each candidate edge
-   is validated speculatively against the full rules engine); red ones break a
+1. **Explore** — every airport served by an eligible carrier is on the map;
+   marker size/colour = number of onward destinations for the selected fare
+   product ("where should I even try from here?"). Hollow blue-outlined
+   markers are dead ends served from a single airport.
+2. Click an airport (or search) to set your **origin**.
+3. **Build** — green airports are *legal next hops* (each candidate edge is
+   validated speculatively against the full rules engine); red ones break a
    rule — click to see exactly which; faint ones have no direct eligible
-   flight. The sidebar tracks segments/16, mileage vs cap, continents, ocean
-   crossings, stopovers, the derived fare basis, and a "to finish you still
-   need to…" checklist.
+   flight (add a 🚆 **surface sector** if you'll make your own way). The
+   sidebar tracks segments, mileage vs cap, continents, ocean crossings,
+   stopovers, the derived fare basis, and a "to finish you still need to…"
+   checklist.
 4. Points are **stopovers by default** (staying >24h) — tick "transfer" at
-   points where you just connect (a layover under 24h). The fare needs at
-   least 2 stopovers, and stopover caps are separate from the 16-segment
-   limit. Pick the operating carrier per segment, add
-   **surface sectors** (🚆), undo/redo, and delete any leg with ✕ — removing
-   a middle leg drops that point and merges the neighbours into one direct
-   leg (or a surface sector if no direct flight exists). Switch fare product
-   live (a Global Explorer itinerary may bust Explorer's per-continent caps —
-   instantly visible), **share** the itinerary as a URL, and **export** a text
-   summary for rtw.oneworld.com or a travel agent.
+   points where you just connect. Pick the operating carrier per leg where
+   it matters, delete any leg with ✕, undo/redo freely.
+5. Switch fare product or alliance at any time — the same itinerary is
+   re-validated instantly. **Share** your route as a URL, or **export** a
+   text summary for the official tool or a travel agent.
+
+**No availability or pricing, by design.** A legal route ≠ bookable seats.
+Finish in [rtw.oneworld.com](https://rtw.oneworld.com) or the
+[Star Alliance Book and Fly tool](https://www.staralliance.com/en/round-the-world),
+or hand the export to a travel agent.
 
 ## Architecture
+
+npm-workspaces monorepo, deployed as a static site to GitHub Pages on every
+push to `main` (`.github/workflows/deploy.yml`: test → build → publish).
 
 ```
 packages/
   shared/         types + geography tables (continents/TCs, Russia–Urals split,
                   Hawaii set, US transcon columns, AU restricted pairs,
                   per-product carrier masks, metro city codes)
-  rules-engine/   pure TS validators for 3015 / 9701 / 7889; zero deps;
-                  returns {valid, extensible, violations, warnings, todos,
-                  assumptions, stats, fareBasis}; 62 unit + golden +
+  rules-engine/   pure TS validators for 3015 / 9701 / 7889 / Star RTW; zero
+                  deps; returns {valid, extensible, violations, warnings,
+                  todos, assumptions, stats, fareBasis}; 83 unit + golden +
                   property tests
-  data-pipeline/  ourairports.com airport metadata + route crawl → 
+  data-pipeline/  ourairports.com airport metadata + route crawl →
                   data/snapshot/snapshot.json (+ report.json)
 apps/
   web/            Vite + React + MapLibre GL (no map token needed)
 data/
-  snapshot/       generated route graph (committed artifact, weekly refresh)
+  snapshot/       generated route graph (committed artifact)
   cache/          downloaded source data (safe to delete)
 docs/
-  rules-pdfs/     canonical fare-rule PDFs + extracted text
+  rules-pdfs/     canonical fare-rule texts (oneworld PDFs + Star T&C)
 ```
 
 The rules engine classifies every rule as **monotone** (once broken, always
@@ -84,55 +75,50 @@ broken → next-hop filtered off the map), **completable-only-if** (fine now,
 must hold at the end → checklist), or **date-dependent** (validated only when
 dates are attached; otherwise listed as assumptions).
 
-### Route data providers
+### Route data
 
-`RouteDataProvider` is swappable (build guide §4.2):
+`RouteDataProvider` is swappable:
 
 - **Wikipedia provider (default, no API key)** — crawls each airport's
   "Airlines and destinations" table via the MediaWiki API from carrier-hub
-  seeds, maps affiliate brands (QantasLink → QF, American Eagle → AA, …),
+  seeds, maps affiliate brands (QantasLink → QF, United Express → UA, …),
   strips cargo rows, resolves destination links through ourairports metadata,
   and marks an edge `confidence: "both"` when the reverse page confirms it.
-- **AeroDataBox provider** — the build guide's primary recommendation; used
-  automatically when `AERODATABOX_API_KEY` (RapidAPI) is set. The free/cheap
-  tiers cover a weekly refresh.
+- **AeroDataBox provider** — used automatically when `AERODATABOX_API_KEY`
+  (RapidAPI) is set.
 
-Re-run `npm run pipeline` weekly-ish; the snapshot embeds `generatedAt`,
-sources, and per-edge confidence, and `report.json` logs unresolved
-destination labels and airports without data for maintainer review.
+The current snapshot covers **1,512 airports and 15,610 directed edges**
+across both alliances; its generation date and rules editions are shown in
+the app footer.
 
 ## Known limitations (also surfaced in the UI)
 
-1. **No availability or pricing.** A legal route ≠ bookable L/D/A/I inventory.
-   Always finish in [rtw.oneworld.com](https://rtw.oneworld.com) or with an
-   agent.
+1. **No availability or pricing** — see above.
 2. **Mileage is great-circle**, not GDS ticketed-point mileage (TPM, typically
    ≤2% different). The app warns within 3% of any cap.
 3. **Stopover vs transfer needs dwell times.** Without dates every point is
-   assumed a stopover (>24h); tick "transfer" where you'll just connect. The
-   engine surfaces this as an assumption until dates exist.
-4. **Codeshare nuances are warnings, not data.** JQ/QQ/TN/WY exceptions need
-   marketing-carrier data we don't have; the engine warns instead of failing.
-5. **Rules and membership change.** Carrier lists and rule editions are config
-   (`packages/shared/src/carriers.ts`, `geography.ts`); re-fetch the PDFs when
-   oneworld publishes new editions. The rules edition and snapshot date are in
-   the app footer.
-6. **Route data is best-effort** (community-maintained sources); single-source
-   edges are tagged in the snapshot. Schedules-with-dates lookups (build guide
-   §4 layer 2) need a paid schedules API key and are not wired up.
-7. **Direct flights with intermediate stops** (one flight number, one coupon —
-   e.g. a one-stop "single plane service") count as **one segment** under the
-   fare rules, and the route data already includes them where Wikipedia lists
-   the through-destination. Caveat: mileage for such an edge is the
-   end-to-end great circle, which understates the flown TPM via the stop —
-   another reason to mind the 3% cap warning.
+   assumed a stopover; the engine surfaces this as an assumption.
+4. **Codeshare nuances are warnings, not data** (e.g. Jetstar-operated QF
+   codeshares) — verify those legs when booking.
+5. **Rules and membership change.** Carrier lists and rule editions are
+   config (`packages/shared/src/carriers.ts`, `geography.ts`); re-fetch the
+   source rules when the alliances publish new editions.
+6. **Route data is best-effort** (community-maintained sources); a missing
+   route ≠ the flight doesn't exist. Single-source edges are tagged in the
+   snapshot.
+7. **Direct flights with intermediate stops** (one flight number, one coupon)
+   count as one segment; their mileage is the end-to-end great circle, which
+   understates the flown TPM via the stop.
 
 ## Development
 
 ```bash
-npm test                                  # rules-engine suite
-npx tsc -p packages/rules-engine/tsconfig.json   # typechecks
-npm run pipeline                          # refresh snapshot (cached, resumable)
-npm run dev                               # web app dev server
-npm run build                             # production build (apps/web/dist)
+npm install
+npm test              # rules-engine suite (83 tests)
+npm run dev           # local dev server → http://localhost:5173
+npm run build         # production build (apps/web/dist)
+npm run pipeline      # rebuild data/snapshot/snapshot.json (cached, resumable)
 ```
+
+Pushing to `main` deploys automatically. See the
+[user guide](docs/user-guide.md) for a walkthrough of the app itself.
